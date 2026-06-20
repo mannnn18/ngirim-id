@@ -1,13 +1,14 @@
 <?php
-define('LARAVEL_START', microtime(true));
 
-// Daftarkan autoloader Composer
-require __DIR__.'/../vendor/autoload.php';
+// 1. Alihkan semua file sistem internal Laravel ke folder /tmp (Folder yang tidak dikunci Vercel)
+putenv('APP_SERVICES_CACHE=/tmp/services.php');
+putenv('APP_PACKAGES_CACHE=/tmp/packages.php');
+putenv('APP_CONFIG_CACHE=/tmp/config.php');
+putenv('APP_ROUTES_CACHE=/tmp/routes.php');
+putenv('APP_EVENTS_CACHE=/tmp/events.php');
+putenv('VIEW_COMPILED_PATH=/tmp/views');
 
-// Panggil aplikasi Laravel
-$app = require_once __DIR__.'/../bootstrap/app.php';
-
-// === VERCEL HACK: Pindahkan semua aktivitas Storage ke folder /tmp ===
+// 2. Buat kerangka folder Storage sementara
 $storagePath = '/tmp/storage';
 $directories = [
     $storagePath . '/app/public',
@@ -16,19 +17,21 @@ $directories = [
     $storagePath . '/framework/testing',
     $storagePath . '/framework/views',
     $storagePath . '/logs',
+    '/tmp/views'
 ];
 
-// Buat foldernya secara otomatis jika belum ada
 foreach ($directories as $dir) {
     if (!is_dir($dir)) {
         mkdir($dir, 0777, true);
     }
 }
 
-// Paksa Laravel menggunakan jalur baru ini
-$app->useStoragePath($storagePath);
-// ====================================================================
+// 3. Panggil sistem Laravel
+require __DIR__.'/../vendor/autoload.php';
+$app = require_once __DIR__.'/../bootstrap/app.php';
 
-// Tangkap dan jalankan request website
-$request = Illuminate\Http\Request::capture();
-$app->handleRequest($request);
+// 4. Paksa Laravel menggunakan jalur Storage yang baru
+$app->useStoragePath($storagePath);
+
+// 5. Tangkap request dan jalankan aplikasi
+$app->handleRequest(Illuminate\Http\Request::capture());
