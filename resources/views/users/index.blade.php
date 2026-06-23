@@ -48,6 +48,10 @@
                                 @if(auth()->user()->role === 'admin_pusat' && $u->role === 'kurir')
                                     <span class="text-muted small"><i class="bi bi-lock me-1"></i>Read Only</span>
                                 @else
+                                    <a href="/users/{{ $u->id_user }}/edit" class="btn btn-sm btn-warning me-1" title="Edit Akun">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    
                                     <form action="/users/{{ $u->id_user }}" method="POST" class="d-inline" id="delete-form-{{ $u->id_user }}">
                                         @csrf 
                                         @method('DELETE')
@@ -70,7 +74,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    // Notifikasi jika berhasil menambah data
     @if(session('success'))
         Swal.fire({ 
             icon: 'success', 
@@ -81,7 +84,6 @@
         });
     @endif
 
-    // Notifikasi jika ada error
     @if(session('error'))
         Swal.fire({ 
             icon: 'error', 
@@ -92,7 +94,6 @@
         });
     @endif
 
-    // Pop-up Konfirmasi Hapus Akun
     function confirmDelete(id) {
         Swal.fire({
             title: 'Hapus Pengguna?',
